@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div>
+		<article class="screen">
+			<input type="checkbox" value="None" id="magicButton" name="check" />
+			<label class="main" for="magicButton"></label>
+			<div class="coverImage"></div>
+			<div class="search"></div>
+			<div class="bodyPlayer"></div>
+						<table class="list">
+							<!--Data list Song-->
+						</table>
+				
+						  <div class="shadow"></div>
+						  
+						  <div class="bar"></div>
+						  
+						  <div class="info">
+							  <h4>STRESSED OUT</h4>
+							  <h3>twenty one pilots - Blurryface</h3>
+						  </div>
+		  <audio preload="auto" id="audio" controls>
+			<!-- Data Mussic -->
+			  </audio>
+						  <table class="player">
+							  <td><input type="checkbox" id="backward"/><label class="backward" for="backward"></label></td>
+							  <td><input type="checkbox" id="play" title="Play" onclick="togglePlayPause()"/><label class="play" for="play"></label></td>
+							  <td><input type="checkbox" id="forward"/><label class="forward" for="forward"></label></td>
+						  </table>
+						  <table class="footer">
+							  <td><input type="checkbox" id="love" checked /><label class="love" for="love"></label></td>
+							  <td><input type="checkbox" id="shuffle"/><label class="shuffle" for="shuffle"></label></td>
+							  <td><input type="checkbox" id="repeat" checked /><label class="repeat" for="repeat"></label></td>
+							  <td><input type="checkbox" id="options"/><label class="options" for="options"></label></td>
+						  </table>
+						  
+						  <div class="current"><h2>STRESSED OUT</h2></div>
+				  </article>
+	</div>
+
+</body>
+<script>
+	const $ = document.querySelector.bind(document)
+	const $$ = document.querySelectorAll.bind(document)
+	
+	// create app
+	const music_app = {
+	// tạo chỉ mục bài hát đầu tiên
+	currentIndex : 0,
+	// data bai hat
+	songs: [
+    {   id: 1,
+        name: 'Heavy Dirty Soul',
+        singer:'twenty one pilots - Blurryface',
+        time: '3:54',
+        path: 'http://www.jplayer.org/audio/mp3/Miaow-02-Hidden.mp3',
+        liked: [0,1],
+        image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
+    },
+    {   id: 2,
+        name: 'StressedOut',
+        singer:'Issac',
+        time: '3:54',
+        path: './music/mussic1.mp3',
+        liked: [0,1],
+        image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
+    },
+    {   id: 3,
+        name: 'Fairy Local',
+        singer:'Issac',
+        time: '3:54',
+        path: './music/mussic1.mp3',
+        liked: [0,1],
+        image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
+    },
+],
+	// tao ham render view 
+	render: function(){
+			const songs_htmls = this.songs.map(song=>{
+				return  `
+							<tr class="song">
+								<td class="nr"><h5>${song.id}<h5></td>
+								  <td class="title"><h6>${song.name}<h6>
+								  </td>
+								  <td class="length"><h5>${song.time}<h5></td>
+								  <td><input type="checkbox" id="heart"/><label class="zmr" for="heart"></label></td>
+							  </tr>
+				  		`
+			});
+
+			// inner HTML data song vao list table
+			$('.list').innerHTML = songs_htmls.join('')
+	},
+	// Tạo hàm định nghĩa những thuộc tính
+	defineProperties: function(){
+		Object.defineProperty(this, 'currentSong',{
+			get: function(){
+				return this.songs[this.currentIndex]
+			}
+		})
+	},	
+	// tạo hàm load First Song 
+	loadFirstSong: function(){
+		const image_thumb = $('.coverImage')
+		const audio = $('#audio')
+		const info = $('.info h4')
+		const info_singer = $('.info h3')
+		// apply data song inner HTML
+		info.textContent = this.currentSong.name
+		info_singer.textContent = this.currentSong.singer
+		image_thumb.style.backgroundImage = `url(${this.currentSong.image})`
+		audio.src = this.currentSong.path
+
+	},
+	// Tạo hàm start ứng dụng. 
+	start: function(){
+		// Định nghĩa các thuộc tính cho Obj
+		this.defineProperties()
+
+		// Tạo hàm tải bài hát đầu tiên lên UI khi run app
+		this.loadFirstSong()
+
+		// Render danh sách Playlist song
+		this.render()
+	},
+
+}
+// start app
+music_app.start()
+</script>
+ <script src="main.js"></script>
+</html>
