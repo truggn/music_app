@@ -236,6 +236,13 @@ label.main:hover:before {
   background: #1d1d1d;
   text-indent: 8px;
 }
+.list tr.song.active td h6 {
+  color: yellowgreen;
+}
+
+.list tr.song.active td h5 {
+  color: yellowgreen;
+}
 
 .list tr:hover {
   background: #222;

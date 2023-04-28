@@ -28,20 +28,31 @@
 							  <h4>STRESSED OUT</h4>
 							  <h3>twenty one pilots - Blurryface</h3>
 						  </div>
-		  <audio preload="auto" id="audio" controls>
+		  		<audio preload="auto" id="audio" controls>
 			<!-- Data Mussic -->
-			  </audio>
-						  <table class="player">
-							  <td><input type="checkbox" id="backward"/><label class="backward" for="backward"></label></td>
-							  <td><input type="checkbox" id="play" title="Play" onclick="togglePlayPause()"/><label class="play" for="play"></label></td>
-							  <td><input type="checkbox" id="forward"/><label class="forward" for="forward"></label></td>
-						  </table>
-						  <table class="footer">
-							  <td><input type="checkbox" id="love" checked /><label class="love" for="love"></label></td>
-							  <td><input type="checkbox" id="shuffle"/><label class="shuffle" for="shuffle"></label></td>
-							  <td><input type="checkbox" id="repeat" checked /><label class="repeat" for="repeat"></label></td>
-							  <td><input type="checkbox" id="options"/><label class="options" for="options"></label></td>
-						  </table>
+			  	</audio>
+			
+			<table class="player">
+				<td><input type="checkbox" id="backward"/><label class="backward" for="backward"></label></td>
+				<td><input type="checkbox" id="play" title="Play"/><label class="play" for="play"></label></td>
+				<td><input type="checkbox" id="forward"/><label class="forward" for="forward"></label></td>
+			</table>
+			<!-- <div id="timeline">
+				<span id="current-time">0:36</span>
+				<span id="total-time">2:55</span>
+				<div class="slider" data-direction="horizontal">
+					<div class="progress" style="width: 20.989%;">
+						<div class="pin" id="progress-pin" data-method="rewind"></div>
+					</div>
+				</div>
+			</div> -->
+			<input type="range" class="progress" id="progress" value="0" step="1" min="0" max="100" style="background-color: red;">
+			<table class="footer">
+				<td><input type="checkbox" id="love" checked /><label class="love" for="love"></label></td>
+				<td><input type="checkbox" id="shuffle"/><label class="shuffle" for="shuffle"></label></td>
+				<td><input type="checkbox" id="repeat" checked /><label class="repeat" for="repeat"></label></td>
+				<td><input type="checkbox" id="options"/><label class="options" for="options"></label></td>
+			</table>
 						  
 						  <div class="current"><h2>STRESSED OUT</h2></div>
 				  </article>
@@ -49,56 +60,92 @@
 
 </body>
 <script>
+
+	//key luu nhung option vao localstorage
+	const PLAYER_STORAGE_OPTION = 'mussic_app'
+
 	const $ = document.querySelector.bind(document)
 	const $$ = document.querySelectorAll.bind(document)
+	const image_thumb = $('.coverImage')
+	const info = $('.info h4')
+	const info_singer = $('.info h3')
+	const playBtn = $('.play')
+	const player = $('.player')
+	const progress = $('.progress')
+	const nextBtn = $('#forward')
+	const prevBtn = $('#backward')
+	const randomBtn = $('.shuffle')
+	const repeatBtn = $('.repeat')
+	const playList = $('.list')
 	
 	// create app
 	const music_app = {
 	// tạo chỉ mục bài hát đầu tiên
 	currentIndex : 0,
+	// gán cờ giá trị isPlaying là false
+	isPlaying: false,
+	isRandom : false,
+	isRepeat: false,
+	config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_OPTION)) ||  {},
+
 	// data bai hat
 	songs: [
     {   id: 1,
-        name: 'Heavy Dirty Soul',
+        name: 'Là Anh',
         singer:'twenty one pilots - Blurryface',
         time: '3:54',
-        path: 'http://www.jplayer.org/audio/mp3/Miaow-02-Hidden.mp3',
+        path: './music/LaAnh-PhamLichBMZ-8811329.mp3',
         liked: [0,1],
         image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
     },
     {   id: 2,
-        name: 'StressedOut',
-        singer:'Issac',
+        name: 'See Tình Remix',
+        singer:'Hoàng Thùy Linh',
         time: '3:54',
-        path: './music/mussic1.mp3',
+        path: './music/SeeTinhSpeedupRemix-HoangThuyLinh-7202618.mp3',
         liked: [0,1],
         image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
     },
     {   id: 3,
-        name: 'Fairy Local',
-        singer:'Issac',
+        name: 'Ưng quá chừng',
+        singer:'Amee',
         time: '3:54',
-        path: './music/mussic1.mp3',
+        path: './music/UngQuaChung-AMEE-8783624.mp3',
+        liked: [0,1],
+        image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
+    },
+	{   id: 4,
+        name: 'Waiting For You',
+        singer:'Mono',
+        time: '3:54',
+        path: './music/WaitingForYou-MONOOnionn-7733882.mp3',
         liked: [0,1],
         image:  'https://angstyteenwatchingtoomuchtv.files.wordpress.com/2015/07/tumblr_nlhsir3adc1sk2qobo1_12801.gif'
     },
 ],
+
+	// set config
+	setConfig: function(key, value){
+		this.config[key] = value;
+		localStorage.setItem(PLAYER_STORAGE_OPTION, JSON.stringify(this.config))
+	},
+
 	// tao ham render view 
 	render: function(){
-			const songs_htmls = this.songs.map(song=>{
+			const songs_htmls = this.songs.map((song, index)=>{
 				return  `
-							<tr class="song">
+							<tr class="song ${index === this.currentIndex ? 'active' : ''}" data-index=${index}>
 								<td class="nr"><h5>${song.id}<h5></td>
 								  <td class="title"><h6>${song.name}<h6>
 								  </td>
 								  <td class="length"><h5>${song.time}<h5></td>
-								  <td><input type="checkbox" id="heart"/><label class="zmr" for="heart"></label></td>
+								  <td><input type="checkbox" class="heart" id="heart${song.id}"/><label class="zmr" for="heart${song.id}"></label></td>
 							  </tr>
 				  		`
 			});
 
 			// inner HTML data song vao list table
-			$('.list').innerHTML = songs_htmls.join('')
+			playList.innerHTML = songs_htmls.join('')
 	},
 	// Tạo hàm định nghĩa những thuộc tính
 	defineProperties: function(){
@@ -108,12 +155,8 @@
 			}
 		})
 	},	
-	// tạo hàm load First Song 
-	loadFirstSong: function(){
-		const image_thumb = $('.coverImage')
-		const audio = $('#audio')
-		const info = $('.info h4')
-		const info_singer = $('.info h3')
+	// tạo hàm load Current Song 
+	loadCurrentSong: function(){
 		// apply data song inner HTML
 		info.textContent = this.currentSong.name
 		info_singer.textContent = this.currentSong.singer
@@ -121,21 +164,157 @@
 		audio.src = this.currentSong.path
 
 	},
+	// Hàm loadConfig data từ Storage
+	loadConfigStorage: function(){
+		this.isRandom = this.config.isRandom;
+		this.isRepeat = this.config.isRepeat
+	},
+	// hàm xử lý sự kiện 
+	handleEvents: function(){
+		const _this = this 
+		// Xử lý khi click Play 
+		playBtn.onclick = function(){
+			// check nếu mà đang playing thì ta sẽ pause và ngược lại
+			if( _this.isPlaying ){
+				audio.pause()
+			}else{
+				audio.play()
+			}
+		};
+		// khi bài hát được chạy thì mới chuyển trạng thái
+		audio.onplay = function(){
+			_this.isPlaying = true;
+			player.classList.add('playing')
+		};
+		// ngược lại khi bài hát dừng thì chuyển trạng thái
+		audio.onpause = function(){
+			_this.isPlaying = false;
+			player.classList.remove('playing')
+		};
+		// khi bài hát được play thì xử lý timeline loading
+		audio.ontimeupdate = function(){
+			if(audio.duration){
+				// có nghĩa là lấy thời gian bài hát chia cho phần trăm của thanh timeline
+				const progressPercent = Math.floor(audio.currentTime / audio.duration * 100)
+				progress.value = progressPercent 
+			}
+		};
+		// tua bài hát 
+		progress.onchange = function(e){
+			const seekTime = audio.duration / 100 * e.target.value
+			audio.currentTime = seekTime
+		};
+		// Xử lý khi bấm nút next
+		nextBtn.onclick = function(){
+			if(_this.isRandom){ 
+				_this.randomSong()
+			}else{
+				_this.nextSong()
+			}
+			// khi next sang bài hát mới thì play lại audio
+			audio.play();
+			// khi next thì render lại để add lại class active lên DOM
+			_this.render()
+		};
+		// Xử lý khi bấm nút Pre
+		prevBtn.onclick = function(){
+			if(_this.isRandom){
+				_this.randomSong()
+			}else{
+				_this.PrevSong()
+			}
+			audio.play()
+			_this.render()
+		};
+		// Xử lý Random/ tắt Random bài hát
+		randomBtn.onclick = function(){
+			_this.randomSong()
+			_this.setConfig('random', _this.isRandom) // sau khi click nút random thì lưu giá trị vào localsto
+		};
+		// Xử lý bài hát khi nó kết thúc thì thực hiện chuyển sang bài mới
+		// xử lý nếu click repeat thì chạy lại bài hát đó, ngược lại thì next sang bài mới
+		audio.onended = function(){
+			if(_this.isRepeat){
+				audio.play()
+			}else{
+				nextBtn.click()
+			}
+		}
+		// xử lý repeat lại bài hiện tại
+		repeatBtn.onclick = function(e){
+			_this.isRepeat = true // đảo isRepeat là true
+			_this.setConfig('repeat-song', _this.isRepeat)// sau khi click btn repeat thì lưu giá trị vào local
+		};
+
+		// Lắng nghe sự kiện click play list 
+		playList.onclick = function(e){
+			// click xử lý khi click vào xong => chuyển đến bài click
+			const targetElement = e.target.closest('.list tr:not(.active )')
+			const targetOption = e.target.closest('.zmr')
+			if(targetElement || targetOption ){
+				// xử lý click vào list song
+				if(targetElement){
+					//get index
+					_this.currentIndex = Number(targetElement.dataset.index);
+					// load bai hat
+					_this.loadCurrentSong()
+					_this.render()
+					audio.play()
+				}
+				// xử lý click vào option
+				if(targetOption){
+					// logic click option
+				}
+			}
+		};
+	},
+		// Next bài hát
+	nextSong: function(){
+			this.currentIndex++ // tăng lên 1 giá trị 
+			// kiểm tra đó có phải là bài hát cuối ko?
+			if(this.currentIndex >= this.songs.length){
+				this.currentIndex = 0 // quay ve bai dau tien
+			};
+			this.loadCurrentSong() // goi lai ham load bai dau tien
+		},
+		// Pre bài hát
+	PrevSong : function(){
+		this.currentIndex--
+		if(this.currentIndex < 0){
+			this.currentIndex = this.songs.length - 1
+		}
+		this.loadCurrentSong() // goi lai ham load bai dau tien
+		},
+	// Tao ham Random Song 
+	randomSong: function(){
+		let newIndex
+		// khi bật nút random mà ta thực hiện click bấm nút next thì sẽ không phát lại bài hát hiện tại
+			do {
+				newIndex = Math.floor(Math.random() * this.songs.length)
+			} while (newIndex == this.currentIndex );
+		// xét lại curentIndex và load lại bài hát
+		 this.currentIndex = newIndex
+		 this.loadCurrentSong()
+
+	},
 	// Tạo hàm start ứng dụng. 
 	start: function(){
 		// Định nghĩa các thuộc tính cho Obj
 		this.defineProperties()
 
+		// Hàm xử lý các sự kiện diễn ra
+		this.handleEvents()
+
 		// Tạo hàm tải bài hát đầu tiên lên UI khi run app
-		this.loadFirstSong()
+		this.loadCurrentSong()
 
 		// Render danh sách Playlist song
 		this.render()
+
 	},
 
 }
 // start app
 music_app.start()
 </script>
- <script src="main.js"></script>
 </html>
